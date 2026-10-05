@@ -8,32 +8,24 @@ logging:
     - type: console
       threshold: INFO
       logFormat: "%-5p [%d{ISO8601,UTC}] [%X{gradingJID:--}]: %m%n%rEx"
-    - type: file
-      logFormat: "%-5p [%d{ISO8601,UTC}] [%X{gradingJID:--}]: %m%n%rEx"
-      currentLogFilename: var/log/judgels-grader.log
-      archivedLogFilenamePattern: var/log/judgels-grader-%d.log.gz
-      archivedFileCount: 14
 
 judgels:
   baseDataDir: var/data
 
   rabbitmq:
-    host: localhost         # CHANGE THIS TO CORE VM IP
-    username: judgels       # CHANGE THIS TO VALID RABBITMQ USER
-    password: password      # CHANGE THIS TO VALID RABBITMQ PASSWORD
+    host: judgels-rabbitmq
+    username: judgelsuser
+    password: password
 
-gabriel:
   grading:
-    gradingRequestQueueName: gabriel-grading-request
-    numWorkerThreads: 2
+    gradingRequestQueueName: judgels-grading-request
+    numWorkerThreads: 4
 
-  cache:
-    cachedBaseDataDir: var/data
-    # CHANGE THIS TO VALID CORE VM SSH CREDENTIAL AND CORE VM DIRECTORY
-    # If you are running the grader on core vm (1 vm setup), just change this to absolute path dir of the mounted container dir
-    # e.g: /judgels/server/var/data
-    serverBaseDataDir: user@localhost:/opt/judgels/server/var/data   
-    rsyncIdentityFile: var/conf/judgels-grader
+    cache:
+      cachedBaseDataDir: var/data
+      # Single-VM setup: server data is mounted at /judgels/server/var/data
+      serverBaseDataDir: /judgels/server/var/data
+      rsyncIdentityFile: var/conf/judgels-grader
 
   isolate:
     baseDir: /judgels/isolate

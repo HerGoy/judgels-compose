@@ -2,6 +2,7 @@ server:
   applicationConnectors:
     - type: http
       port: 9101
+      useForwardedHeaders: true
 
   adminConnectors:
     - type: http
@@ -16,18 +17,19 @@ server:
 
 database:
   driverClass: com.mysql.cj.jdbc.Driver
-  # ADJUST THE DB URL ACCORDING TO YOUR DB DOCKER SERVICE NAME
-  # AND ALSO DATABASE NAME
-  # jdbc:mysql://{DB HOST}/{DB NAME}?useSSL=false&allowPublicKeyRetrieval=true
   url: jdbc:mysql://judgels-db/judgels?useSSL=false&allowPublicKeyRetrieval=true
-  user: judgelsuser  # CHANGE THIS
-  password: password # CHANGE THIS
+  user: judgelsuser
+  password: password
+  minSize: 10
+  maxSize: 64
+  checkConnectionWhileIdle: true
+  minIdleTime: 1 minute
   properties:
     charSet: UTF-8
-    hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate.dialect: org.hibernate.dialect.MySQLDialect
     hibernate.generate_statistics: false
-    hibernate.query.plan_cache_max_size: 64
-    hibernate.query.plan_parameter_metadata_max_size: 32
+    hibernate.query.plan_cache_max_size: 128
+    hibernate.query.plan_parameter_metadata_max_size: 64
 
 logging:
   appenders:
@@ -51,74 +53,48 @@ judgels:
   baseDataDir: var/data
 
   app:
-    name: judgels
-  rabbitmq:
-    # ADJUST THIS TO YOUR RABBITMQ HOST 
-    host: judgels-rabbitmq 
-    username: judgels       # CHANGE THIS
-    password: password      # CHANGE THIS
+    name: Judgels
+    licenseKey: "a"
 
-jophiel:
-  auth:
-    # UNCOMMENT BELOW IF YOU WANT TO ENABLE GOOGLE OAUTH
-    # google:
-    #   clientId: {{ jophiel_auth_google_clientId }}
-  userAvatar:
-    fs:
-      type: local
+  rabbitmq:
+    host: judgels-rabbitmq
+    username: judgelsuser
+    password: password
+
+  grading:
+    gradingRequestQueueName: judgels-grading-request
+    gradingResponseQueueName: judgels-grading-response
+
+  mailer:
+    host: smtp.gmail.com
+    port: 465
+    useSsl: true
+    username: "your-email@gmail.com" # CHANGE THIS
+    password: "your-app-password" # CHANGE THIS
+    sender: "your-email@gmail.com" # CHANGE THIS
 
   userRegistration:
-    enabled: false
+    enabled: true
     useRecaptcha: false
     activationEmailTemplate:
-      subject: UNUSED
-      body: UNUSED
+      subject: "Activate your account"
+      body: "Click here to activate: http://your-domain.com/activate/{{emailCode}}"
 
   userResetPassword:
-    enabled: false
+    enabled: true
     requestEmailTemplate:
-      subject: UNUSED
-      body: UNUSED
+      subject: "Reset your password"
+      body: "Click here to reset: http://your-domain.com/reset-password/{{emailCode}}"
     resetEmailTemplate:
-      subject: UNUSED
-      body: UNUSED
+      subject: "Password Reset Successful"
+      body: "Your password has been successfully reset."
 
   superadmin:
-    initialPassword: superadminpass   # CHANGE THIS
+    initialPassword: superadminpass # CHANGE THIS
 
-  session:
-    maxConcurrentSessionsPerUser: -1  # OPTIONAL, -1 for unlimited session per user
-    disableLogout: false
-
-  web:
-    announcements: []
-
-sandalphon:
-  gabriel:
-    gradingRequestQueueName: gabriel-grading-request
-    gradingResponseQueueName: sandalphon-grading-response
-
-uriel:
-  gabriel:
-    gradingRequestQueueName: gabriel-grading-request
-    gradingResponseQueueName: uriel-grading-response
-
+training:
   submission:
     fs:
       type: local
-
-  file:
-    fs:
-      type: local
-
-jerahmeel:
-  gabriel:
-    gradingRequestQueueName: gabriel-grading-request
-    gradingResponseQueueName: jerahmeel-grading-response
-
-  submission:
-    fs:
-      type: local
-
   stats:
     enabled: true

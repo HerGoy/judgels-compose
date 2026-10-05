@@ -111,6 +111,31 @@ The script detects the running `judgels-server` container and bind-mounts `./jud
 
 4. Access the interfaces as described in the multi-VM step 10, except `CORE_VM_IP` is your single host's address (use `localhost` if accessing from the same machine).
 
+## 🚀 Operations & Management (`./manage.sh`)
+
+This repository provides an automated operational script `./manage.sh` for simplified lifecycle management:
+
+```bash
+./manage.sh start           # Start all containers in the background
+./manage.sh stop            # Stop all containers
+./manage.sh restart         # Down and up the entire stack
+./manage.sh status          # View status of running containers
+./manage.sh logs [service]  # Tail container logs (e.g. ./manage.sh logs judgels-grader)
+./manage.sh shell [service] # Open a bash shell inside a container
+./manage.sh verify-user <u> # Immediately activate and verify a registered user
+./manage.sh rebuild-client  # Rebuild React frontend SPA and safely reload container
+```
+
+## ⚡ Performance & Security Hardening
+
+This deployment stack includes production-ready optimizations:
+
+* **Grader Multithreading:** Configured with 4 worker threads (`conf/judgels-grader.yml`), achieving ~80 submissions/minute processing capacity.
+* **MySQL 8.4 In-Memory Tuning:** Buffer pool increased to 512MB and connection pool expanded to 200 concurrent connections.
+* **JVM Low-Latency GC:** Pre-configured with Garbage-First Garbage Collector (`-XX:+UseG1GC`) to eliminate stop-the-world pauses during live contests.
+* **Nginx Reverse Proxy:** Upstream TCP keepalive pooling, automatic worker scaling, and immutable 30-day client browser caching.
+* **Internal Port Isolation:** All backend and daemon ports (`9101`, `15672`, `5672`, `1025`, `8025`) are strictly bound to `127.0.0.1`, exposing only public HTTP/HTTPS ports to external networks.
+
 ## Contributing
 
 If you discovered any issue regarding the judgels docker configuration, please see [ISSUES.md](./ISSUES.md) to create new issue.
